@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# bootstrap
+#
+# Get ready to develop
+
+set -e
+
+echo ""
+echo "  awesome-app"
+echo ""
+
+#
+# Check for VirtualBox
+#
+if test $(which virtualbox)
+then
+  echo "  o VirtualBox found."
+else
+  echo "  x You need to install VirtualBox."
+  echo "    You can download it from https://www.virtualbox.org/wiki/Downloads"
+  exit 1
+fi
+
+#
+# Check for Vagrant
+#
+if test $(which vagrant)
+then
+  echo "  o Vagrant found."
+else
+  echo "  x You need to install Vagrant."
+  echo "    You can download it from http://www.vagrantup.com/downloads.html"
+  exit 1
+fi
+
+#
+# Install vagrant plugin
+#
+if [[ $(vagrant plugin list) =~ dotenv ]]
+then
+  echo "  o Vagrant plugin 'dotenv' found."
+else
+  echo "  + Installing Vagrant plugin 'dotenv'"
+  vagrant plugin install dotenv
+fi
+
+#
+# Prepare coreos/.env
+#
+if test -f coreos/.env
+then
+  echo "  o coreos/.env found"
+else
+  echo "  + Creating coreos/.env"
+  cp coreos/.env.sample coreos/.env
+fi
+
+echo ""
+echo "  Good work. We're ready."
+echo ""
+
+exit 0
