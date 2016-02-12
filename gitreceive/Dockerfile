@@ -14,8 +14,13 @@ RUN mkdir /var/run/sshd
 COPY files/sshd_config /etc/ssh/
 
 RUN gitreceive init
+RUN echo "git:passwd" | chpasswd
+COPY files/receiver /home/git/
+
+COPY entrypoint.sh /
 
 VOLUME /home/git
 EXPOSE 22
 
-CMD ["/usr/sbin/sshd", "-D"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/usr/sbin/sshd", "-D", "-e"]

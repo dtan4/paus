@@ -1,2 +1,4 @@
 *
+!entrypoint.sh
 !files/sshd_config
+!files/receiver

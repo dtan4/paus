@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "Repository: $1"
+echo "Revision: $2"
+echo "Username: $3"
+echo "Fingerprint: $4"
