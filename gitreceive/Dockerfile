@@ -16,6 +16,6 @@ COPY files/sshd_config /etc/ssh/
 RUN gitreceive init
 
 VOLUME /home/git
-EXPOSE 2222
+EXPOSE 22
 
 CMD ["/usr/sbin/sshd", "-D"]
