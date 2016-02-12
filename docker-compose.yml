@@ -1,0 +1,4 @@
+gitreceive:
+  build: gitreceive
+  ports:
+    - "2222:22"
