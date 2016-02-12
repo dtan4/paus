@@ -1,0 +1,6 @@
+UsePrivilegeSeparation sandbox
+Subsystem sftp internal-sftp
+
+PermitRootLogin no
+PasswordAuthentication no
+ChallengeResponseAuthentication no
