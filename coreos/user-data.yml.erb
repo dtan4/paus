@@ -29,6 +29,19 @@ coreos:
 
         [Install]
         WantedBy=sockets.target
+    - name: install-docker-compose.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install Docker Compose
+
+        [Service]
+        ExecStartPre=/usr/bin/mkdir -p /opt/bin
+        ExecStart=/usr/bin/wget https://github.com/docker/compose/releases/download/<%= ENV["DOCKER_COMPOSE_VERSION"] %>/docker-compose-Linux-x86_64 -O /opt/bin/docker-compose
+        ExecStartPost=/usr/bin/chown root:root /opt/bin/docker-compose
+        ExecStartPost=/usr/bin/chmod +x /opt/bin/docker-compose
+        RemainAfterExit=yes
+        Type=oneshot
 write_files:
   - path: /etc/ssh/sshd_config
     permissions: "0600"
