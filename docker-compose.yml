@@ -2,3 +2,8 @@ gitreceive:
   build: gitreceive
   ports:
     - "2222:22"
+gitreceive-run:
+  build: gitreceive
+  volumes_from:
+    - gitreceive
+  entrypoint: gitreceive
