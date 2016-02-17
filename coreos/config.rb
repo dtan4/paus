@@ -7,7 +7,7 @@ erb = File.open(File.join(File.dirname(__FILE__), "user-data.yml.erb")) { |f| ER
 File.write(File.join(File.dirname(__FILE__), "user-data"), erb.result(binding))
 
 # Size of the CoreOS cluster created by Vagrant
-$num_instances=1
+$num_instances=3
 
 # Used to fetch a new discovery token for a cluster of size $num_instances
 $new_discovery_url="https://discovery.etcd.io/new?size=#{$num_instances}"

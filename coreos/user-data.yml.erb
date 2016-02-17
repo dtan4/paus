@@ -4,7 +4,15 @@ coreos:
   update:
     group: beta
     reboot-strategy: off
+  etcd2:
+    discovery: <%= ENV["ETCD_DISCOVERY_URL"] %>
+    advertise-client-urls: "http://$public_ipv4:2379"
+    initial-advertise-peer-urls: "http://$private_ipv4:2380"
+    listen-client-urls: "http://0.0.0.0:2379"
+    listen-peer-urls: "http://$private_ipv4:2380"
   units:
+    - name: etcd2.service
+      command: start
     - name: settimezone.service
       command: start
       content: |
@@ -42,6 +50,26 @@ coreos:
         ExecStartPost=/usr/bin/chmod +x /opt/bin/docker-compose
         RemainAfterExit=yes
         Type=oneshot
+    - name: vulcand.service
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Vulcand
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        User=core
+        ExecStartPre=-/usr/bin/docker kill vulcand
+        ExecStartPre=-/usr/bin/docker rm vulcand
+        ExecStartPre=/usr/bin/docker pull mailgun/vulcand:v0.8.0-beta.3
+        ExecStart=/usr/bin/docker run --name vulcand -p 80:80 -p 443:443 -p 8182:8182 -p 8181:8181 mailgun/vulcand:v0.8.0-beta.3 /go/bin/vulcand -apiInterface=0.0.0.0 -interface=0.0.0.0 -etcd=http://$private_ipv4:2379 -port=80 -apiPort=8182
+        ExecStop=/usr/bin/docker stop vulcand
+
+        [Install]
+        WantedBy=multi-user.target
     - name: paus-frontend.service
       command: start
       enable: true
@@ -56,7 +84,7 @@ coreos:
         ExecStartPre=-/usr/bin/docker kill paus-frontend
         ExecStartPre=-/usr/bin/docker rm paus-frontend
         ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-frontend:latest
-        ExecStart=/usr/bin/docker run --name paus-frontend -p 80:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro quay.io/dtan4/paus-frontend:latest
+        ExecStart=/usr/bin/docker run --name paus-frontend -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro quay.io/dtan4/paus-frontend:latest
         ExecStop=/usr/bin/docker stop paus-frontend
 
         [Install]
