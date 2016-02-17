@@ -1,8 +1,0 @@
-#!/bin/bash
-
-#
-# Usage:
-#   upload-key <username> "$(cat ~/.ssh/id_rsa.pub)"
-#
-
-echo $2 | gitreceive upload-key $1
