@@ -1,16 +1,14 @@
 gitreceive:
-  build: gitreceive
+  image: quay.io/dtan4/paus-gitreceive:latest
   ports:
-    - "2222:22"
+    - 2222:22
 gitreceive-upload-key:
-  build: gitreceive
+  image: quay.io/dtan4/paus-gitreceive:latest
   volumes_from:
     - gitreceive
   entrypoint: /usr/local/bin/upload-key
 frontend:
   image: quay.io/dtan4/paus-frontend:latest
-  environment:
-    - COMPOSE_FILE=$PWD/docker-compose.yml
   ports:
     - 80:8080
   volumes:
