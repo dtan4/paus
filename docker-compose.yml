@@ -2,8 +2,6 @@ gitreceive:
   image: quay.io/dtan4/paus-gitreceive:latest
   ports:
     - "2222:22"
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
 gitreceive-upload-key:
   image: quay.io/dtan4/paus-gitreceive:latest
   volumes_from:
