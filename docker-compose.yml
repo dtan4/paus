@@ -1,7 +1,7 @@
 gitreceive:
   image: quay.io/dtan4/paus-gitreceive:latest
   ports:
-    - 2222:22
+    - "2222:22"
 gitreceive-upload-key:
   image: quay.io/dtan4/paus-gitreceive:latest
   volumes_from:
@@ -10,7 +10,7 @@ gitreceive-upload-key:
 frontend:
   image: quay.io/dtan4/paus-frontend:latest
   ports:
-    - 80:8080
+    - "80:8080"
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - $PWD/docker-compose.yml:/app/docker-compose.yml:ro
