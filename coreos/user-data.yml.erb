@@ -42,6 +42,44 @@ coreos:
         ExecStartPost=/usr/bin/chmod +x /opt/bin/docker-compose
         RemainAfterExit=yes
         Type=oneshot
+    - name: paus-frontend.service
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Paus frontend
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/docker kill paus-frontend
+        ExecStartPre=-/usr/bin/docker rm paus-frontend
+        ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-frontend:latest
+        ExecStart=/usr/bin/docker run --name paus-frontend -p 80:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro quay.io/dtan4/paus-frontend:latest
+        ExecStop=/usr/bin/docker stop paus-frontend
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: paus-gitreceive.service
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Paus gitreceive
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/docker kill paus-gitreceive
+        ExecStartPre=-/usr/bin/docker rm paus-gitreceive
+        ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-gitreceive:latest
+        ExecStart=/usr/bin/docker run --name paus-gitreceive -p 2222:22 quay.io/dtan4/paus-gitreceive:latest
+        ExecStop=/usr/bin/docker stop paus-gitreceive
+
+        [Install]
+        WantedBy=multi-user.target
 write_files:
   - path: /etc/ssh/sshd_config
     permissions: "0600"
@@ -67,3 +105,10 @@ write_files:
       restrict default nomodify nopeer noquery limited kod
       restrict 127.0.0.1
       restrict [::1]
+  - path: /home/core/docker-compose.yml
+    content: |
+      gitreceive-upload-key:
+        image: quay.io/dtan4/paus-gitreceive:latest
+        volumes_from:
+          - paus-gitreceive
+        entrypoint: /usr/local/bin/upload-key
