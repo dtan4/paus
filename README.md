@@ -13,7 +13,7 @@ $ docker-compose up gitreceive
 ### Register SSH public key
 
 ```bash
-$ cat ~/.ssh/id_rsa.pub | docker-compose run gitreceive-run upload-key <username>
+$ docker-compose run gitreceive-upload-key <username> "$(cat ~/.ssh/id_rsa.pub)"
 ```
 
 ### Write `~/.ssh/config`

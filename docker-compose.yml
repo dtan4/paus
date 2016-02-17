@@ -2,8 +2,8 @@ gitreceive:
   build: gitreceive
   ports:
     - "2222:22"
-gitreceive-run:
+gitreceive-upload-key:
   build: gitreceive
   volumes_from:
     - gitreceive
-  entrypoint: gitreceive
+  entrypoint: /usr/local/bin/upload-key

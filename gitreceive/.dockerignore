@@ -2,3 +2,4 @@
 !entrypoint.sh
 !files/sshd_config
 !files/receiver
+!files/upload-key
