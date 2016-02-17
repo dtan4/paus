@@ -1,6 +1,31 @@
 #!/bin/bash
 
+set -e
+
+BASE_DIR=`pwd`
+
+exit_code=0
+
 echo "Repository: $1"
 echo "Revision: $2"
 echo "Username: $3"
 echo "Fingerprint: $4"
+
+mkdir -p /tmp/build/$1 || true
+cat | tar -x -C /tmp/build/$1
+cd /tmp/build/$1
+
+if [[ -f docker-compose.yml ]]; then
+  echo "docker-compose.yml was detected"
+  docker-compose build
+  docker-compose pull
+  docker-compose up -d
+else
+  echo "docker-compose.yml was NOT found!"
+  exit_code=1
+fi
+
+cd $BASE_DIR
+rm -rf /tmp/build/$1
+
+exit $exit_code
