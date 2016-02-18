@@ -103,7 +103,7 @@ coreos:
         ExecStartPre=-/usr/bin/docker kill paus-gitreceive
         ExecStartPre=-/usr/bin/docker rm paus-gitreceive
         ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-gitreceive:latest
-        ExecStart=/usr/bin/docker run --name paus-gitreceive -p 2222:22 quay.io/dtan4/paus-gitreceive:latest
+        ExecStart=/usr/bin/docker run --name paus-gitreceive -p 2222:22 -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> quay.io/dtan4/paus-gitreceive:latest
         ExecStop=/usr/bin/docker stop paus-gitreceive
 
         [Install]
