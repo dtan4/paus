@@ -1,29 +1,32 @@
 # Paus
 
-UNDER DEVELOPMENT
+Docker Compose PaaS
 
-## Usage
+:warning: UNDER DEVELOPMENT :warning:
 
-### Launch gitreceive + sshd
+## Run on Vagrant
+### Launch VMs
 
-```bash
-$ docker-compose up gitreceive
+3 CoreOS VMs are launched.
+
+``` bash
+$ cd coreos
+$ vagrant up
 ```
 
-### Register SSH public key
+### Upload SSH public key
 
-```bash
-$ docker-compose run gitreceive-upload-key <username> "$(cat ~/.ssh/id_rsa.pub)"
-```
+Access to http://172.17.8.101:8080 and upload your username and SSH public key.
 
 ### Write `~/.ssh/config`
 
 ```
 Host paus
-  HostName <hostname_or_ip_of_paus>
+  HostName 172.17.8.101
   User git
   Port 2222
   IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
 ```
 
 ### Add Git remote repository
