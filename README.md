@@ -5,6 +5,19 @@ Docker Compose PaaS
 :warning: UNDER DEVELOPMENT :warning:
 
 ## Run on Vagrant
+### Prepare `.env`
+
+Set environment variables via `.env`.
+
+``` bash
+$ script/boostrap
+$ cat .env
+TIMEZONE=Asia/Tokyo
+DOCKER_COMPOSE_VERSION=1.6.0
+ETCD_DISCOVERY_URL=
+PAUS_BASE_DOMAIN=
+```
+
 ### Launch VMs
 
 3 CoreOS VMs are launched.
