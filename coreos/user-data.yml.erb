@@ -133,6 +133,18 @@ write_files:
       restrict default nomodify nopeer noquery limited kod
       restrict 127.0.0.1
       restrict [::1]
+  - path: /home/core/.docker/config.json
+    permissions: 0644
+    owner: core:core
+    content: |
+      {
+        "auths": {
+          "quay.io": {
+            "auth": "<%= ENV["DOCKER_QUAY_AUTH"]%>",
+            "email": ""
+          }
+        }
+      }
   - path: /home/core/docker-compose.yml
     content: |
       gitreceive-upload-key:
