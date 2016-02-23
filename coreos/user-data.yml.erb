@@ -83,8 +83,8 @@ coreos:
         TimeoutStartSec=0
         ExecStartPre=-/usr/bin/docker kill paus-frontend
         ExecStartPre=-/usr/bin/docker rm paus-frontend
-        ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-frontend:latest
-        ExecStart=/usr/bin/docker run --name paus-frontend -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro quay.io/dtan4/paus-frontend:latest
+        ExecStartPre=/usr/bin/docker pull quay.io/wantedly/paus-frontend:latest
+        ExecStart=/usr/bin/docker run --name paus-frontend -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro quay.io/wantedly/paus-frontend:latest
         ExecStop=/usr/bin/docker stop paus-frontend
 
         [Install]
@@ -102,8 +102,8 @@ coreos:
         TimeoutStartSec=0
         ExecStartPre=-/usr/bin/docker kill paus-gitreceive
         ExecStartPre=-/usr/bin/docker rm paus-gitreceive
-        ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-gitreceive:latest
-        ExecStart=/usr/bin/docker run --name paus-gitreceive -p 2222:22 -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> quay.io/dtan4/paus-gitreceive:latest
+        ExecStartPre=/usr/bin/docker pull quay.io/wantedly/paus-gitreceive:latest
+        ExecStart=/usr/bin/docker run --name paus-gitreceive -p 2222:22 -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> quay.io/wantedly/paus-gitreceive:latest
         ExecStop=/usr/bin/docker stop paus-gitreceive
 
         [Install]
@@ -136,7 +136,7 @@ write_files:
   - path: /home/core/docker-compose.yml
     content: |
       gitreceive-upload-key:
-        image: quay.io/dtan4/paus-gitreceive:latest
+        image: quay.io/wantedly/paus-gitreceive:latest
         volumes_from:
           - paus-gitreceive
         entrypoint: /usr/local/bin/upload-key
