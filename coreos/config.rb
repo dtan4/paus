@@ -6,6 +6,10 @@ Dotenv.load
 erb = File.open(File.join(File.dirname(__FILE__), "user-data.yml.erb")) { |f| ERB.new(f.read) }
 File.write(File.join(File.dirname(__FILE__), "user-data"), erb.result(binding))
 
+if ENV["MANAGER"] == 'TRUE'
+  is_manager = true
+  File.write(File.join(File.dirname(__FILE__), "user-data-manager"), erb.result(binding))
+end
 # Size of the CoreOS cluster created by Vagrant
 $num_instances=3
 
