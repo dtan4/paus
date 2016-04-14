@@ -6,22 +6,19 @@ $num_instances=3
 
 if ARGV[0].eql?('up')
   require 'open-uri'
+  require 'yaml'
 
   # Used to fetch a new discovery token for a cluster of size $num_instances
   $new_discovery_url="https://discovery.etcd.io/new?size=#{$num_instances}"
   token = open($new_discovery_url).read
-end
 
-# Create user-data from erb template
-Dotenv.load
-erb = File.open(File.join(File.dirname(__FILE__), "user-data.yml.erb")) { |f| ERB.new(f.read) }
+  # Create user-data from erb template
+  Dotenv.load
+  erb = File.open(File.join(File.dirname(__FILE__), "user-data.yml.erb")) { |f| ERB.new(f.read) }
 
-[:manager, :replica].each do |instance_type|
-  user_data_path = File.join(File.dirname(__FILE__), "user-data-#{instance_type}")
-  File.write(user_data_path, erb.result(binding))
-
-  if ARGV[0].eql?('up')
-    require 'yaml'
+  [:manager, :replica].each do |instance_type|
+    user_data_path = File.join(File.dirname(__FILE__), "user-data-#{instance_type}")
+    File.write(user_data_path, erb.result(binding))
 
     data = YAML.load(IO.readlines(user_data_path)[1..-1].join)
     if data['coreos'].key? 'etcd'
