@@ -40,15 +40,23 @@ $ cd coreos
 $ vagrant up
 ```
 
+### Edit `/etc/hosts`
+
+If you set `PAUS_BASE_DOMAIN` as `pausapp.com`, edit `/etc/hosts/` as below:
+
+```
+172.17.8.101 pausapp.com
+```
+
 ### Upload SSH public key
 
-Access to http://172.17.8.101:8080 and upload your username and SSH public key.
+Access to http://pausapp.com and upload your username and SSH public key.
 
 ### Write `~/.ssh/config`
 
 ```
 Host paus
-  HostName 172.17.8.101
+  HostName pausapp.com
   User git
   Port 2222
   IdentityFile ~/.ssh/id_rsa
