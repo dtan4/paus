@@ -1,5 +1,5 @@
 .vagrant/
 log/
-user-data
 user-data-manager
+user-data-replica
 .env
