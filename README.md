@@ -31,7 +31,7 @@ REGISTRY_AWS_REGION=
 REGISTRY_S3_BUCKET=
 ```
 
-### Launch VMs
+### Launch Paus cluster
 
 3 CoreOS VMs are launched.
 
