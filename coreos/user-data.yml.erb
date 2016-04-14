@@ -98,6 +98,9 @@ coreos:
         ExecStart=/usr/bin/docker run \
           --name paus-frontend \
           -p 8080:8080 \
+          -e BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
+          -e ETCD_ENDPOINT=http://$private_ipv4:2379 \
+          -e URI_SCHEME=<%= ENV["PAUS_URI_SCHEME"] %> \
           -v /var/run/docker.sock:/var/run/docker.sock \
           -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro \
           quay.io/dtan4/paus-frontend:latest
