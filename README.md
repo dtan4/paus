@@ -74,3 +74,12 @@ $ git remote add paus git@paus:<app_name>
 ```bash
 $ git push paus master
 ```
+
+## Modules
+
+Paus consists of the below modules:
+
+- [__paus-frontend__](https://github.com/dtan4/paus-frontend)
+  - Web frontend of Paus
+- [__paus-gitreceive__](https://github.com/dtan4/paus-gitreceive)
+  - Git server of Paus
