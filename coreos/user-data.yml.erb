@@ -51,34 +51,6 @@ coreos:
         RemainAfterExit=yes
         Type=oneshot
 <% if instance_type == :manager %>
-    - name: vulcand.service
-      command: start
-      enable: true
-      content: |
-        [Unit]
-        Description=Vulcand
-        After=docker.service
-        Requires=docker.service
-
-        [Service]
-        TimeoutStartSec=0
-        Restart=always
-        User=core
-        ExecStartPre=-/usr/bin/docker kill vulcand
-        ExecStartPre=-/usr/bin/docker rm vulcand
-        ExecStartPre=/usr/bin/docker pull mailgun/vulcand:v0.8.0-beta.3
-        ExecStart=/usr/bin/docker run \
-          --name vulcand \
-          -p 80:80 \
-          -p 443:443 \
-          -p 8182:8182 \
-          -p 8181:8181 \
-          mailgun/vulcand:v0.8.0-beta.3 \
-          /go/bin/vulcand -apiInterface=0.0.0.0 -interface=0.0.0.0 -etcd=http://$private_ipv4:2379 -port=80 -apiPort=8182
-        ExecStop=/usr/bin/docker stop vulcand
-
-        [Install]
-        WantedBy=multi-user.target
     - name: paus-frontend.service
       command: start
       enable: true
@@ -97,7 +69,9 @@ coreos:
         ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-frontend:latest
         ExecStart=/usr/bin/docker run \
           --name paus-frontend \
-          -p 8080:8080 \
+          -e BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
+          -e ETCD_ENDPOINT=http://$private_ipv4:2379 \
+          -e URI_SCHEME=<%= ENV["PAUS_URI_SCHEME"] %> \
           -v /var/run/docker.sock:/var/run/docker.sock \
           -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro \
           quay.io/dtan4/paus-frontend:latest
@@ -105,6 +79,47 @@ coreos:
 
         [Install]
         WantedBy=multi-user.target
+    - name: vulcand.service
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Vulcand
+        After=paus-frontend.service
+        Requires=paus-frontend.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        User=core
+        ExecStartPre=-/usr/bin/docker kill vulcand
+        ExecStartPre=-/usr/bin/docker rm vulcand
+        ExecStartPre=/usr/bin/docker pull mailgun/vulcand:v0.8.0-beta.3
+        ExecStart=/usr/bin/docker run \
+          --name vulcand \
+          --link paus-frontend:paus-frontend \
+          -p 80:80 \
+          -p 443:443 \
+          -p 8182:8182 \
+          -p 8181:8181 \
+          mailgun/vulcand:v0.8.0-beta.3 \
+          /go/bin/vulcand -apiInterface=0.0.0.0 -interface=0.0.0.0 -etcd=http://$private_ipv4:2379 -port=80 -apiPort=8182
+        ExecStop=/usr/bin/docker stop vulcand
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: add-route-to-paus-frontend.service
+      command: start
+      content: |
+        [Unit]
+        Description=Add route to paus-frontend
+        After=etcd2.service vulcand.service paus-frontend.service
+        Requires=etcd2.service vulcand.service paus-frontend.service
+
+        [Service]
+        ExecStart=/home/core/add-route-to-paus-frontend.sh
+        RemainAfterExit=yes
+        Type=oneshot
     - name: paus-gitreceive.service
       command: start
       enable: true
@@ -233,8 +248,17 @@ write_files:
       restrict default nomodify nopeer noquery limited kod
       restrict 127.0.0.1
       restrict [::1]
+  - path: /home/core/add-route-to-paus-frontend.sh
+    permissions: "0755"
+    owner: core:core
+    content: |
+      #!/bin/bash
+
+      etcdctl set /vulcand/backends/paus-frontend/backend '{"Type": "http"}' > /dev/null
+      etcdctl set /vulcand/backends/paus-frontend/servers/paus-frontend '{"URL": "http://paus-frontend:8080"}' > /dev/null
+      etcdctl set /vulcand/frontends/paus-frontend/frontend '{"Type": "http", "BackendId": "paus-frontend", "Route": "Host(`<%= ENV["PAUS_BASE_DOMAIN"] %>`) && PathRegexp(`/`)"}'
   - path: /home/core/.docker/config.json
-    permissions: 0644
+    permissions: "0644"
     owner: core:core
     content: |
       {
