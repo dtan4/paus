@@ -1,47 +1,49 @@
 require 'erb'
 require 'dotenv'
 
-# Create user-data from erb template
-Dotenv.load
-erb = File.open(File.join(File.dirname(__FILE__), "user-data.yml.erb")) { |f| ERB.new(f.read) }
-File.write(File.join(File.dirname(__FILE__), "user-data"), erb.result(binding))
-
 # Size of the CoreOS cluster created by Vagrant
 $num_instances=3
 
-# Used to fetch a new discovery token for a cluster of size $num_instances
-$new_discovery_url="https://discovery.etcd.io/new?size=#{$num_instances}"
+if ARGV[0].eql?('up')
+  require 'open-uri'
 
-# To automatically replace the discovery token on 'vagrant up', uncomment
-# the lines below:
-#
-#if File.exists?('user-data') && ARGV[0].eql?('up')
-#  require 'open-uri'
-#  require 'yaml'
-#
-#  token = open($new_discovery_url).read
-#
-#  data = YAML.load(IO.readlines('user-data')[1..-1].join)
-#  if data['coreos'].key? 'etcd'
-#    data['coreos']['etcd']['discovery'] = token
-#  end
-#  if data['coreos'].key? 'etcd2'
-#    data['coreos']['etcd2']['discovery'] = token
-#  end
-#
-#  # Fix for YAML.load() converting reboot-strategy from 'off' to `false`
-#  if data['coreos'].key? 'update'
-#     if data['coreos']['update'].key? 'reboot-strategy'
-#        if data['coreos']['update']['reboot-strategy'] == false
-#           data['coreos']['update']['reboot-strategy'] = 'off'
-#        end
-#     end
-#  end
-#
-#  yaml = YAML.dump(data)
-#  File.open('user-data', 'w') { |file| file.write("#cloud-config\n\n#{yaml}") }
-#end
-#
+  # Used to fetch a new discovery token for a cluster of size $num_instances
+  $new_discovery_url="https://discovery.etcd.io/new?size=#{$num_instances}"
+  token = open($new_discovery_url).read
+end
+
+# Create user-data from erb template
+Dotenv.load
+erb = File.open(File.join(File.dirname(__FILE__), "user-data.yml.erb")) { |f| ERB.new(f.read) }
+
+[:manager, :replica].each do |instance_type|
+  user_data_path = File.join(File.dirname(__FILE__), "user-data-#{instance_type}")
+  File.write(user_data_path, erb.result(binding))
+
+  if ARGV[0].eql?('up')
+    require 'yaml'
+
+    data = YAML.load(IO.readlines(user_data_path)[1..-1].join)
+    if data['coreos'].key? 'etcd'
+      data['coreos']['etcd']['discovery'] = token
+    end
+    if data['coreos'].key? 'etcd2'
+      data['coreos']['etcd2']['discovery'] = token
+    end
+
+    # Fix for YAML.load() converting reboot-strategy from 'off' to `false`
+    if data['coreos'].key? 'update'
+      if data['coreos']['update'].key? 'reboot-strategy'
+        if data['coreos']['update']['reboot-strategy'] == false
+          data['coreos']['update']['reboot-strategy'] = 'off'
+        end
+      end
+    end
+
+    yaml = YAML.dump(data)
+    File.open(user_data_path, 'w') { |file| file.write("#cloud-config\n\n#{yaml}") }
+  end
+end
 
 #
 # coreos-vagrant is configured through a series of configuration

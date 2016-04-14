@@ -5,7 +5,7 @@ coreos:
     group: beta
     reboot-strategy: off
   etcd2:
-    discovery: <%= ENV["ETCD_DISCOVERY_URL"] %>
+    discovery:
     advertise-client-urls: "http://$public_ipv4:2379"
     initial-advertise-peer-urls: "http://$private_ipv4:2380"
     listen-client-urls: "http://0.0.0.0:2379"
@@ -50,6 +50,7 @@ coreos:
         ExecStartPost=/usr/bin/chmod +x /opt/bin/docker-compose
         RemainAfterExit=yes
         Type=oneshot
+<% if instance_type == :manager %>
     - name: vulcand.service
       command: start
       enable: true
@@ -61,11 +62,19 @@ coreos:
 
         [Service]
         TimeoutStartSec=0
+        Restart=always
         User=core
         ExecStartPre=-/usr/bin/docker kill vulcand
         ExecStartPre=-/usr/bin/docker rm vulcand
         ExecStartPre=/usr/bin/docker pull mailgun/vulcand:v0.8.0-beta.3
-        ExecStart=/usr/bin/docker run --name vulcand -p 80:80 -p 443:443 -p 8182:8182 -p 8181:8181 mailgun/vulcand:v0.8.0-beta.3 /go/bin/vulcand -apiInterface=0.0.0.0 -interface=0.0.0.0 -etcd=http://$private_ipv4:2379 -port=80 -apiPort=8182
+        ExecStart=/usr/bin/docker run \
+          --name vulcand \
+          -p 80:80 \
+          -p 443:443 \
+          -p 8182:8182 \
+          -p 8181:8181 \
+          mailgun/vulcand:v0.8.0-beta.3 \
+          /go/bin/vulcand -apiInterface=0.0.0.0 -interface=0.0.0.0 -etcd=http://$private_ipv4:2379 -port=80 -apiPort=8182
         ExecStop=/usr/bin/docker stop vulcand
 
         [Install]
@@ -81,10 +90,17 @@ coreos:
 
         [Service]
         TimeoutStartSec=0
+        Restart=always
+        User=core
         ExecStartPre=-/usr/bin/docker kill paus-frontend
         ExecStartPre=-/usr/bin/docker rm paus-frontend
         ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-frontend:latest
-        ExecStart=/usr/bin/docker run --name paus-frontend -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro quay.io/dtan4/paus-frontend:latest
+        ExecStart=/usr/bin/docker run \
+          --name paus-frontend \
+          -p 8080:8080 \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro \
+          quay.io/dtan4/paus-frontend:latest
         ExecStop=/usr/bin/docker stop paus-frontend
 
         [Install]
@@ -100,11 +116,95 @@ coreos:
 
         [Service]
         TimeoutStartSec=0
+        Restart=always
+        User=core
         ExecStartPre=-/usr/bin/docker kill paus-gitreceive
         ExecStartPre=-/usr/bin/docker rm paus-gitreceive
         ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-gitreceive:latest
-        ExecStart=/usr/bin/docker run --name paus-gitreceive -p 2222:22 -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> quay.io/dtan4/paus-gitreceive:latest
+        ExecStart=/usr/bin/docker run \
+          --name paus-gitreceive \
+          -p 2222:22 \
+          -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
+          quay.io/dtan4/paus-gitreceive:latest
         ExecStop=/usr/bin/docker stop paus-gitreceive
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: swarm-manager.service
+      command: start
+      content: |
+        [Unit]
+        Description=swarm-manager Container
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        User=core
+        ExecStartPre=-/usr/bin/docker stop swarm-manager
+        ExecStartPre=-/usr/bin/docker rm swarm-manager
+        ExecStartPre=-/usr/bin/docker pull swarm
+        ExecStart=/usr/bin/docker run \
+          -p 2377:2375 \
+          --name=swarm-manager \
+          swarm \
+          manage --addr=$private_ipv4:2375 etcd://$private_ipv4:2379/swarm
+        ExecStop=/usr/bin/docker stop swarm-manager
+
+        [Install]
+        WantedBy=multi-user.target
+<% else %>
+    - name: swarm-agent.service
+      command: start
+      content: |
+        [Unit]
+        Description=swarm-agent Container
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        User=core
+        ExecStartPre=-/usr/bin/docker stop swarm-agent
+        ExecStartPre=-/usr/bin/docker rm swarm-agent
+        ExecStartPre=-/usr/bin/docker pull swarm
+        ExecStart=/usr/bin/docker run \
+          --name=swarm-agent \
+          swarm \
+          join --addr=$private_ipv4:2375 etcd://$private_ipv4:2379/swarm
+        ExecStop=/usr/bin/docker stop swarm-agent
+
+        [Install]
+        WantedBy=multi-user.target
+<% end %>
+    - name: registry.service
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Private Docker Registry
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        User=core
+        ExecStartPre=-/usr/bin/docker kill registry
+        ExecStartPre=-/usr/bin/docker rm registry
+        ExecStartPre=/usr/bin/docker pull registry:2
+        ExecStart=/usr/bin/docker run \
+          --name registry \
+          -p 5000:5000 \
+          -e REGISTRY_STORAGE=s3 \
+          -e REGISTRY_STORAGE_S3_ACCESSKEY=<%= ENV["REGISTRY_AWS_ACCESS_KEY_ID"] %> \
+          -e REGISTRY_STORAGE_S3_SECRETKEY=<%= ENV["REGISTRY_AWS_SECRET_ACCESS_KEY"] %> \
+          -e REGISTRY_STORAGE_S3_REGION=<%= ENV["REGISTRY_AWS_REGION"] %> \
+          -e REGISTRY_STORAGE_S3_BUCKET=<%= ENV["REGISTRY_S3_BUCKET"] %> \
+          registry:2
+        ExecStop=/usr/bin/docker stop registry
 
         [Install]
         WantedBy=multi-user.target
@@ -133,6 +233,19 @@ write_files:
       restrict default nomodify nopeer noquery limited kod
       restrict 127.0.0.1
       restrict [::1]
+  - path: /home/core/.docker/config.json
+    permissions: 0644
+    owner: core:core
+    content: |
+      {
+        "auths": {
+          "quay.io": {
+            "auth": "<%= ENV["DOCKER_QUAY_AUTH"]%>",
+            "email": ""
+          }
+        }
+      }
+<% if instance_type == :manager %>
   - path: /home/core/docker-compose.yml
     content: |
       gitreceive-upload-key:
@@ -140,3 +253,4 @@ write_files:
         volumes_from:
           - paus-gitreceive
         entrypoint: /usr/local/bin/upload-key
+<% end %>
