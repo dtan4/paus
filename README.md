@@ -11,11 +11,24 @@ Set environment variables via `.env`.
 
 ``` bash
 $ script/boostrap
-$ cat .env
+$ cat coreos/.env
 TIMEZONE=Asia/Tokyo
 DOCKER_COMPOSE_VERSION=1.6.0
-ETCD_DISCOVERY_URL=
 PAUS_BASE_DOMAIN=
+PAUS_URI_SCHEME=http
+
+#
+# Quay.io
+#
+DOCKER_QUAY_AUTH=
+
+#
+# Private Docker Registry
+#
+REGISTRY_AWS_ACCESS_KEY_ID=
+REGISTRY_AWS_SECRET_ACCESS_KEY=
+REGISTRY_AWS_REGION=
+REGISTRY_S3_BUCKET=
 ```
 
 ### Launch VMs
