@@ -163,11 +163,11 @@ coreos:
         User=core
         ExecStartPre=-/usr/bin/docker stop swarm-manager
         ExecStartPre=-/usr/bin/docker rm swarm-manager
-        ExecStartPre=-/usr/bin/docker pull swarm
+        ExecStartPre=-/usr/bin/docker pull swarm:<%= ENV["DOCKER_SWARM_VERSION"] %>
         ExecStart=/usr/bin/docker run \
           -p 2377:2375 \
           --name=swarm-manager \
-          swarm \
+          swarm:<%= ENV["DOCKER_SWARM_VERSION"] %> \
           manage --addr=$private_ipv4:2375 etcd://$private_ipv4:2379/swarm
         ExecStop=/usr/bin/docker stop swarm-manager
 
@@ -188,10 +188,10 @@ coreos:
         User=core
         ExecStartPre=-/usr/bin/docker stop swarm-agent
         ExecStartPre=-/usr/bin/docker rm swarm-agent
-        ExecStartPre=-/usr/bin/docker pull swarm
+        ExecStartPre=-/usr/bin/docker pull swarm:<%= ENV["DOCKER_SWARM_VERSION"] %>
         ExecStart=/usr/bin/docker run \
           --name=swarm-agent \
-          swarm \
+          swarm:<%= ENV["DOCKER_SWARM_VERSION"] %> \
           join --addr=$private_ipv4:2375 etcd://$private_ipv4:2379/swarm
         ExecStop=/usr/bin/docker stop swarm-agent
 
