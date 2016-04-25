@@ -140,6 +140,7 @@ coreos:
           --name paus-gitreceive \
           -p 2222:22 \
           -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
+          -e PAUS_DOCKER_CONFIG_BASE64=<%= ENV["PAUS_DOCKER_CONFIG_BASE64"] %> \
           -e PAUS_DOCKER_HOST=tcp://$private_ipv4:2377 \
           -e PAUS_ETCD_ENDPOINT=http://$private_ipv4:2379 \
           -e PAUS_REPOSITORY_DIR=/repos \
