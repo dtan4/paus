@@ -198,35 +198,35 @@ coreos:
         [Install]
         WantedBy=multi-user.target
 <% end %>
-    - name: registry.service
-      command: start
-      enable: true
-      content: |
-        [Unit]
-        Description=Private Docker Registry
-        After=docker.service
-        Requires=docker.service
+    # - name: registry.service
+    #   command: start
+    #   enable: true
+    #   content: |
+    #     [Unit]
+    #     Description=Private Docker Registry
+    #     After=docker.service
+    #     Requires=docker.service
 
-        [Service]
-        TimeoutStartSec=0
-        Restart=always
-        User=core
-        ExecStartPre=-/usr/bin/docker kill registry
-        ExecStartPre=-/usr/bin/docker rm registry
-        ExecStartPre=/usr/bin/docker pull registry:2
-        ExecStart=/usr/bin/docker run \
-          --name registry \
-          -p 5000:5000 \
-          -e REGISTRY_STORAGE=s3 \
-          -e REGISTRY_STORAGE_S3_ACCESSKEY=<%= ENV["REGISTRY_AWS_ACCESS_KEY_ID"] %> \
-          -e REGISTRY_STORAGE_S3_SECRETKEY=<%= ENV["REGISTRY_AWS_SECRET_ACCESS_KEY"] %> \
-          -e REGISTRY_STORAGE_S3_REGION=<%= ENV["REGISTRY_AWS_REGION"] %> \
-          -e REGISTRY_STORAGE_S3_BUCKET=<%= ENV["REGISTRY_S3_BUCKET"] %> \
-          registry:2
-        ExecStop=/usr/bin/docker stop registry
+    #     [Service]
+    #     TimeoutStartSec=0
+    #     Restart=always
+    #     User=core
+    #     ExecStartPre=-/usr/bin/docker kill registry
+    #     ExecStartPre=-/usr/bin/docker rm registry
+    #     ExecStartPre=/usr/bin/docker pull registry:2
+    #     ExecStart=/usr/bin/docker run \
+    #       --name registry \
+    #       -p 5000:5000 \
+    #       -e REGISTRY_STORAGE=s3 \
+    #       -e REGISTRY_STORAGE_S3_ACCESSKEY=<%= ENV["REGISTRY_AWS_ACCESS_KEY_ID"] %> \
+    #       -e REGISTRY_STORAGE_S3_SECRETKEY=<%= ENV["REGISTRY_AWS_SECRET_ACCESS_KEY"] %> \
+    #       -e REGISTRY_STORAGE_S3_REGION=<%= ENV["REGISTRY_AWS_REGION"] %> \
+    #       -e REGISTRY_STORAGE_S3_BUCKET=<%= ENV["REGISTRY_S3_BUCKET"] %> \
+    #       registry:2
+    #     ExecStop=/usr/bin/docker stop registry
 
-        [Install]
-        WantedBy=multi-user.target
+    #     [Install]
+    #     WantedBy=multi-user.target
 write_files:
   - path: /etc/ssh/sshd_config
     permissions: "0600"
