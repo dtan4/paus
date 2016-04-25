@@ -13,6 +13,12 @@ coreos:
   units:
     - name: etcd2.service
       command: start
+    - name: docker.service
+      drop-ins:
+        - name: 10-cluster-config.conf
+          content: |
+            [Service]
+            Environment="DOCKER_OPTS=--cluster-store=etcd://0.0.0.0:2379 --cluster-advertise=eth0:2375"
     - name: settimezone.service
       command: start
       content: |
