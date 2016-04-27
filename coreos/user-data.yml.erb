@@ -227,6 +227,7 @@ coreos:
           -v /var/run/docker.sock:/var/run/docker.sock \
           -v /proc/:/host/proc/:ro \
           -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+          -v /opt/dd-agent-conf.d:/conf.d:ro \
           -e API_KEY=<%= ENV["DATADOG_API_KEY"] %> \
           -e TAGS="paus" \
           datadog/docker-dd-agent:latest
@@ -318,4 +319,13 @@ write_files:
         volumes_from:
           - paus-gitreceive
         entrypoint: /usr/local/bin/upload-key
+<% end %>
+<% if datadog_enabled %>
+  - path: /opt/dd-agent-conf.d/etcd.yaml
+    content: |
+      init_config:
+
+      instances:
+        - url: "http://$private_ipv4:2379"
+          timeout: 5
 <% end %>
