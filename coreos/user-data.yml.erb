@@ -13,6 +13,12 @@ coreos:
   units:
     - name: etcd2.service
       command: start
+    - name: docker.service
+      drop-ins:
+        - name: 10-cluster-config.conf
+          content: |
+            [Service]
+            Environment="DOCKER_OPTS=--cluster-store=etcd://0.0.0.0:2379 --cluster-advertise=eth0:2375"
     - name: settimezone.service
       command: start
       content: |
@@ -69,9 +75,9 @@ coreos:
         ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-frontend:latest
         ExecStart=/usr/bin/docker run \
           --name paus-frontend \
-          -e BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
-          -e ETCD_ENDPOINT=http://$private_ipv4:2379 \
-          -e URI_SCHEME=<%= ENV["PAUS_URI_SCHEME"] %> \
+          -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
+          -e PAUS_ETCD_ENDPOINT=http://$private_ipv4:2379 \
+          -e PAUS_URI_SCHEME=<%= ENV["PAUS_URI_SCHEME"] %> \
           -v /var/run/docker.sock:/var/run/docker.sock \
           -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro \
           quay.io/dtan4/paus-frontend:latest
@@ -140,6 +146,11 @@ coreos:
           --name paus-gitreceive \
           -p 2222:22 \
           -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
+          -e PAUS_DOCKER_CONFIG_BASE64=<%= ENV["PAUS_DOCKER_CONFIG_BASE64"] %> \
+          -e PAUS_DOCKER_HOST=tcp://$private_ipv4:2377 \
+          -e PAUS_ETCD_ENDPOINT=http://$private_ipv4:2379 \
+          -e PAUS_REPOSITORY_DIR=/repos \
+          -v /home/core/repos:/repos \
           quay.io/dtan4/paus-gitreceive:latest
         ExecStop=/usr/bin/docker stop paus-gitreceive
 
@@ -159,11 +170,11 @@ coreos:
         User=core
         ExecStartPre=-/usr/bin/docker stop swarm-manager
         ExecStartPre=-/usr/bin/docker rm swarm-manager
-        ExecStartPre=-/usr/bin/docker pull swarm
+        ExecStartPre=-/usr/bin/docker pull swarm:<%= ENV["DOCKER_SWARM_VERSION"] %>
         ExecStart=/usr/bin/docker run \
           -p 2377:2375 \
           --name=swarm-manager \
-          swarm \
+          swarm:<%= ENV["DOCKER_SWARM_VERSION"] %> \
           manage --addr=$private_ipv4:2375 etcd://$private_ipv4:2379/swarm
         ExecStop=/usr/bin/docker stop swarm-manager
 
@@ -184,45 +195,45 @@ coreos:
         User=core
         ExecStartPre=-/usr/bin/docker stop swarm-agent
         ExecStartPre=-/usr/bin/docker rm swarm-agent
-        ExecStartPre=-/usr/bin/docker pull swarm
+        ExecStartPre=-/usr/bin/docker pull swarm:<%= ENV["DOCKER_SWARM_VERSION"] %>
         ExecStart=/usr/bin/docker run \
           --name=swarm-agent \
-          swarm \
+          swarm:<%= ENV["DOCKER_SWARM_VERSION"] %> \
           join --addr=$private_ipv4:2375 etcd://$private_ipv4:2379/swarm
         ExecStop=/usr/bin/docker stop swarm-agent
 
         [Install]
         WantedBy=multi-user.target
 <% end %>
-    - name: registry.service
-      command: start
-      enable: true
-      content: |
-        [Unit]
-        Description=Private Docker Registry
-        After=docker.service
-        Requires=docker.service
+    # - name: registry.service
+    #   command: start
+    #   enable: true
+    #   content: |
+    #     [Unit]
+    #     Description=Private Docker Registry
+    #     After=docker.service
+    #     Requires=docker.service
 
-        [Service]
-        TimeoutStartSec=0
-        Restart=always
-        User=core
-        ExecStartPre=-/usr/bin/docker kill registry
-        ExecStartPre=-/usr/bin/docker rm registry
-        ExecStartPre=/usr/bin/docker pull registry:2
-        ExecStart=/usr/bin/docker run \
-          --name registry \
-          -p 5000:5000 \
-          -e REGISTRY_STORAGE=s3 \
-          -e REGISTRY_STORAGE_S3_ACCESSKEY=<%= ENV["REGISTRY_AWS_ACCESS_KEY_ID"] %> \
-          -e REGISTRY_STORAGE_S3_SECRETKEY=<%= ENV["REGISTRY_AWS_SECRET_ACCESS_KEY"] %> \
-          -e REGISTRY_STORAGE_S3_REGION=<%= ENV["REGISTRY_AWS_REGION"] %> \
-          -e REGISTRY_STORAGE_S3_BUCKET=<%= ENV["REGISTRY_S3_BUCKET"] %> \
-          registry:2
-        ExecStop=/usr/bin/docker stop registry
+    #     [Service]
+    #     TimeoutStartSec=0
+    #     Restart=always
+    #     User=core
+    #     ExecStartPre=-/usr/bin/docker kill registry
+    #     ExecStartPre=-/usr/bin/docker rm registry
+    #     ExecStartPre=/usr/bin/docker pull registry:2
+    #     ExecStart=/usr/bin/docker run \
+    #       --name registry \
+    #       -p 5000:5000 \
+    #       -e REGISTRY_STORAGE=s3 \
+    #       -e REGISTRY_STORAGE_S3_ACCESSKEY=<%= ENV["REGISTRY_AWS_ACCESS_KEY_ID"] %> \
+    #       -e REGISTRY_STORAGE_S3_SECRETKEY=<%= ENV["REGISTRY_AWS_SECRET_ACCESS_KEY"] %> \
+    #       -e REGISTRY_STORAGE_S3_REGION=<%= ENV["REGISTRY_AWS_REGION"] %> \
+    #       -e REGISTRY_STORAGE_S3_BUCKET=<%= ENV["REGISTRY_S3_BUCKET"] %> \
+    #       registry:2
+    #     ExecStop=/usr/bin/docker stop registry
 
-        [Install]
-        WantedBy=multi-user.target
+    #     [Install]
+    #     WantedBy=multi-user.target
 write_files:
   - path: /etc/ssh/sshd_config
     permissions: "0600"
