@@ -151,6 +151,7 @@ coreos:
           -e PAUS_ETCD_ENDPOINT=http://$private_ipv4:2379 \
           -e PAUS_REPOSITORY_DIR=/repos \
           -v /home/core/repos:/repos \
+          -v /home/core/git-ssh:/home/git/.ssh \
           quay.io/dtan4/paus-gitreceive:latest
         ExecStop=/usr/bin/docker stop paus-gitreceive
 
