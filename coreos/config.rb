@@ -16,6 +16,8 @@ if ARGV[0].eql?('up')
   Dotenv.load
   erb = File.open(File.join(File.dirname(__FILE__), "user-data.yml.erb")) { |f| ERB.new(f.read) }
 
+  datadog_enabled = ENV["PAUS_DATADOG_ENABLED"] && ["1", "true"].include?(ENV["PAUS_DATADOG_ENABLED"].downcase)
+
   [:manager, :replica].each do |instance_type|
     user_data_path = File.join(File.dirname(__FILE__), "user-data-#{instance_type}")
     File.write(user_data_path, erb.result(binding))

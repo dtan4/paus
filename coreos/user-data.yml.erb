@@ -206,6 +206,36 @@ coreos:
         [Install]
         WantedBy=multi-user.target
 <% end %>
+<% if datadog_enabled %>
+    - name: dd-agent.service
+      command: start
+      content: |
+        [Unit]
+        Description=Datadog Agent
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/docker stop dd-agent
+        ExecStartPre=-/usr/bin/docker rm dd-agent
+        ExecStartPre=-/usr/bin/docker pull datadog/docker-dd-agent:latest
+        ExecStart=/usr/bin/docker run \
+          --privileged \
+          --name dd-agent \
+          -h `hostname` \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          -v /proc/:/host/proc/:ro \
+          -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+          -v /opt/dd-agent-conf.d:/conf.d:ro \
+          -e API_KEY=<%= ENV["DATADOG_API_KEY"] %> \
+          -e TAGS="paus" \
+          datadog/docker-dd-agent:latest
+        ExecStop=/usr/bin/docker stop dd-agent
+
+        [Install]
+        WantedBy=multi-user.target
+<% end %>
     # - name: registry.service
     #   command: start
     #   enable: true
@@ -289,4 +319,13 @@ write_files:
         volumes_from:
           - paus-gitreceive
         entrypoint: /usr/local/bin/upload-key
+<% end %>
+<% if datadog_enabled %>
+  - path: /opt/dd-agent-conf.d/etcd.yaml
+    content: |
+      init_config:
+
+      instances:
+        - url: "http://$private_ipv4:2379"
+          timeout: 5
 <% end %>
