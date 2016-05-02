@@ -298,7 +298,7 @@ write_files:
 
       etcdctl set /vulcand/backends/paus-frontend/backend '{"Type": "http"}' > /dev/null
       etcdctl set /vulcand/backends/paus-frontend/servers/paus-frontend '{"URL": "http://paus-frontend:8080"}' > /dev/null
-      etcdctl set /vulcand/frontends/paus-frontend/frontend '{"Type": "<%= ENV["PAUS_URI_SCHEME"] %>", "BackendId": "paus-frontend", "Route": "Host(`<%= ENV["PAUS_BASE_DOMAIN"] %>`) && PathRegexp(`/`)"}'
+      etcdctl set /vulcand/frontends/paus-frontend/frontend '{"Type": "<%= ENV["PAUS_URI_SCHEME"] %>", "BackendId": "paus-frontend", "Route": "Host(`<%= ENV["PAUS_BASE_DOMAIN"] %>`) && PathRegexp(`/`)", \"Settings\": {\"TrustForwardHeader\": true}}'
   - path: /home/core/.docker/config.json
     permissions: "0644"
     owner: core:core
