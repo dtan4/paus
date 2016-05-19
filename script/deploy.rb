@@ -26,6 +26,8 @@ Dotenv.load
 erb = File.open(File.join(Dir.pwd, "user-data.yml.erb")) { |f| ERB.new(f.read) }
 
 [[:manager, 1], [:replica, 3]].each do |instance|
+datadog_enabled = ENV["PAUS_DATADOG_ENABLED"] && ["1", "true"].include?(ENV["PAUS_DATADOG_ENABLED"].downcase)
+
   instance_type, instance_count = *instance
 
   user_data_path = File.join(Dir.pwd, "user-data-#{instance_type}")
