@@ -77,6 +77,9 @@ coreos:
           --name paus-frontend \
           -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
           -e PAUS_ETCD_ENDPOINT=http://$private_ipv4:2379 \
+          -e PAUS_GITHUB_CLIENT_ID=<%= ENV["PAUS_GITHUB_CLIENT_ID"] %> \
+          -e PAUS_GITHUB_CLIENT_SECRET=<%= ENV["PAUS_GITHUB_CLIENT_SECRET"] %> \
+          -e PAUS_SECRET_KEY_BASE=<%= ENV["PAUS_SECRET_KEY_BASE"] %> \
           -e PAUS_URI_SCHEME=<%= ENV["PAUS_URI_SCHEME"] %> \
           -v /var/run/docker.sock:/var/run/docker.sock \
           -v /home/core/docker-compose.yml:/app/docker-compose.yml:ro \
