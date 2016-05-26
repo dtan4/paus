@@ -160,6 +160,30 @@ coreos:
 
         [Install]
         WantedBy=multi-user.target
+    - name: hchecks.service
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=health-check server
+        After=paus-gitreceive.service
+        Requires=paus-gitreceive.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        User=core
+        ExecStartPre=-/usr/bin/docker kill hchecks
+        ExecStartPre=-/usr/bin/docker rm hchecks
+        ExecStartPre=/usr/bin/docker pull quay.io/dtan4/hchecks:latest
+        ExecStart=/usr/bin/docker run \
+          --name hchecks \
+          -p 8080:8080 \
+          quay.io/dtan4/hchecks:latest
+        ExecStop=/usr/bin/docker stop hchecks
+
+        [Install]
+        WantedBy=multi-user.target
     - name: swarm-manager.service
       command: start
       content: |
