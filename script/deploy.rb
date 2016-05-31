@@ -68,7 +68,7 @@ datadog_enabled = ENV["PAUS_DATADOG_ENABLED"] && ["1", "true"].include?(ENV["PAU
   )
 
   Open3.popen2(*ec2c_commands) do |_, stdout, wait_thr|
-    puts stdout.gets
+    stdout.each { |line| puts line }
 
     exit wait_thr.value.exitstatus unless wait_thr.value.success?
   end
