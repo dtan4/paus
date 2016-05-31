@@ -59,7 +59,7 @@ datadog_enabled = ENV["PAUS_DATADOG_ENABLED"] && ["1", "true"].include?(ENV["PAU
     --publicip
     --az #{ENV["AWS_AVAILABILITY_ZONE"]}
     --count #{instance_count}
-    --type #{ENV["AWS_INSTANCE_TYPE"]}
+    --type #{ENV["AWS_#{instance_type.upcase}_INSTANCE_TYPE"]}
     --key #{ENV["AWS_SSH_KEY_NAME"]}
     --sg #{ENV["AWS_SECURITY_GROUPS"]}
     --subnet #{ENV["AWS_SUBNET_ID"]}
