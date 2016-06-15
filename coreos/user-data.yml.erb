@@ -153,6 +153,7 @@ coreos:
           -e PAUS_DOCKER_HOST=tcp://$private_ipv4:2377 \
           -e PAUS_ETCD_ENDPOINT=http://$private_ipv4:2379 \
           -e PAUS_REPOSITORY_DIR=/repos \
+          -e PAUS_URI_SCHEME=<%= ENV["PAUS_URI_SCHEME"] %> \
           -v /home/core/repos:/repos \
           -v /home/core/git-ssh:/home/git/.ssh \
           quay.io/dtan4/paus-gitreceive:latest
