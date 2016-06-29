@@ -1,6 +1,6 @@
 # Data structure of Paus
 
-Store in etcd
+Stored in etcd
 
 ```
 paus
@@ -11,11 +11,11 @@ paus
        └── <username>
               ├── apps
               │     └── <appname>
-              │             ├── build-args
-              │             │     └── <BUILD_ARG>
-              │             ├── envs
-              │             │     └── <ENV>
-              │             └── revisions
-              │                    └── <revision>
+              │            ├── build-args
+              │            │     └── <BUILD_ARG> : <value>
+              │            ├── envs
+              │            │     └── <ENV> : <value>
+              │            └── deployments
+              │                   └── <timestamp> : <revision>
               └── avater_url
 ```
