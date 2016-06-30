@@ -372,7 +372,7 @@ write_files:
       #!/bin/bash
 
       docker -H tcp://localhost:2377 rm $(docker -H tcp://localhost:2377 ps -a -q) || true
-      docker -H tcp://localhost:2377 rmi $(docker -H tcp://localhost:2377 images -f "dangling=true" -q)
+      docker -H tcp://localhost:2377 rmi $(docker -H tcp://localhost:2377 images -f "dangling=true" -q) || true
 <% end %>
 <% if datadog_enabled %>
   - path: /opt/dd-agent-conf.d/etcd.yaml
