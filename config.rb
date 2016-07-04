@@ -19,6 +19,12 @@ if ARGV[0].eql?('up')
   $new_discovery_url="https://discovery.etcd.io/new?size=#{$num_instances}"
   token = open($new_discovery_url).read
 
+  unless File.exist?(".env")
+    $stderr.puts "Please create .env:"
+    $stderr.puts "  $ cp .env.sample .env"
+    exit 1
+  end
+
   # Create user-data from erb template
   Dotenv.load
 

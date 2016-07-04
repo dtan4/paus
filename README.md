@@ -1,53 +1,33 @@
-# Paus
+# Paus: Docker Compose PaaS
 
-Docker Compose PaaS
+Bring your app to the cloud easily.
 
-## Run on Vagrant
-### Prepare `.env`
+Deploy application by 2 steps:
 
-Set environment variables via `.env`.
+- Prepare `docker-compose.yml` on the repository
+- `git push paus master`
 
-``` bash
+That's all. You don't have to learn the platform-specific file anymore.
+
+## Try on local machine with Vagrant
+
+At first, run `script/bootstrap` :rocket:
+
+```bash
 $ script/boostrap
-$ cat .env
-TIMEZONE=Asia/Tokyo
-
-DOCKER_COMPOSE_VERSION=1.7.0
-DOCKER_SWARM_VERSION=1.2.3
-
-#
-# Paus
-#
-PAUS_BASE_DOMAIN=paus.dev
-PAUS_DOCKER_CONFIG_BASE64=
-PAUS_MAX_APP_DEPLOY=10
-PAUS_SECRET_KEY_BASE=
-PAUS_URI_SCHEME=http
-
-#
-# Create new OAuth application from the URL below, then set Client ID and Client Secret.
-# Callback URL should be "http://$PAUS_BASE_DOMAIN/oauth/callback".
-#
-#   https://github.com/settings/applications/new
-#
-PAUS_GITHUB_CLIENT_ID=
-PAUS_GITHUB_CLIENT_SECRET=
-
-#
-# Quay.io
-#
-DOCKER_QUAY_AUTH=
-
-#
-# Datadog Agent
-#
-PAUS_DATADOG_ENABLED=0
-DATADOG_API_KEY=
 ```
 
-### Launch Paus cluster
+### Prepare `.env`
 
-3 CoreOS VMs are launched.
+Set environment variables in `.env`.
+
+__MUST:__ `PAUS_GITHUB_CLIENT_ID` and `PAUS_GITHUB_CLIENT_SECRET` are required to launch Paus.
+Create new OAuth application from [here](https://github.com/settings/applications/new), then write Client ID and Client Secret in `.env`
+For Vagrant, callback URL should be "http://paus.dev/oauth/callback".
+
+### Launch Paus
+
+3 CoreOS machines are launched.
 
 ``` bash
 $ vagrant up
@@ -55,9 +35,9 @@ $ vagrant dns --install
 $ vagrant dns --start
 ```
 
-### Upload SSH public key
+### Sign up
 
-Access to http://pausapp.com and sign up with your GitHub account.
+Access to http://paus.dev and sign up with your GitHub account.
 
 ### Write `~/.ssh/config`
 
@@ -72,6 +52,7 @@ Host paus.dev
 ### Add Git remote repository
 
 ```bash
+$ cd /path/to/your/app
 $ git remote add paus git@paus.dev:<username>/<app_name>
 ```
 
@@ -80,6 +61,10 @@ $ git remote add paus git@paus.dev:<username>/<app_name>
 ```bash
 $ git push paus master
 ```
+
+### Access to the application
+
+Access to the URL shown the end of deployment.
 
 ## Modules
 
