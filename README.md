@@ -1,6 +1,6 @@
 # Paus: Docker Compose PaaS
 
-Bring your app to the cloud easily.
+_Bring your app to the cloud easily._
 
 Deploy application by 2 steps:
 
@@ -35,9 +35,16 @@ $ vagrant dns --install
 $ vagrant dns --start
 ```
 
-### Sign up
+### Sign up & Create application.
 
 Access to http://paus.dev and sign up with your GitHub account.
+
+![](images/signup.png)
+
+After that, create application.
+
+![](images/index.png)
+![](images/apps.png)
 
 ### Write `~/.ssh/config`
 
