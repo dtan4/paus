@@ -20,8 +20,6 @@ rescue LoadError
   exit 1
 end
 
-Dir.chdir(File.join(Dir.pwd, "coreos"))
-
 num_instances = (ENV["NUM_INSTANCES"] || "4").to_i
 
 # Used to fetch a new discovery token for a cluster of size $num_instances

@@ -9,7 +9,7 @@ Set environment variables via `.env`.
 
 ``` bash
 $ script/boostrap
-$ cat coreos/.env
+$ cat .env
 TIMEZONE=Asia/Tokyo
 
 DOCKER_COMPOSE_VERSION=1.7.0
@@ -50,7 +50,6 @@ DATADOG_API_KEY=
 3 CoreOS VMs are launched.
 
 ``` bash
-$ cd coreos
 $ vagrant up
 $ vagrant dns --install
 $ vagrant dns --start

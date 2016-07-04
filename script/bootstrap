@@ -54,14 +54,14 @@ else
 fi
 
 #
-# Prepare coreos/.env
+# Prepare .env
 #
-if test -f coreos/.env
+if test -f .env
 then
-  echo "  o coreos/.env found"
+  echo "  o .env found"
 else
-  echo "  + Creating coreos/.env"
-  cp coreos/.env.sample coreos/.env
+  echo "  + Creating .env"
+  cp .env.sample .env
 fi
 
 echo ""
