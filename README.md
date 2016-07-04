@@ -56,10 +56,41 @@ Host paus.dev
   StrictHostKeyChecking no
 ```
 
-### Add Git remote repository
+## Prepare `docker-compose.yml`
+
+e.g. Wordpress + MySQL
 
 ```bash
 $ cd /path/to/your/app
+$ cat docker-compose.yml
+version: '2'
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+
+  web:
+    depends_on:
+      - db
+    image: wordpress:latest
+    links:
+      - db
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_PASSWORD: wordpress
+```
+
+### Add Git remote repository
+
+```bash
 $ git remote add paus git@paus.dev:<username>/<app_name>
 ```
 
