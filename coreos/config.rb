@@ -1,5 +1,12 @@
 require 'erb'
-require 'dotenv'
+
+begin
+  require 'dotenv'
+rescue LoadError
+  $stderr.puts "Please install dotenv to load .env:"
+  $stderr.puts "  $ vagrant plugin install dotenv"
+  exit 1
+end
 
 # Size of the CoreOS cluster created by Vagrant
 $num_instances=3
@@ -14,6 +21,7 @@ if ARGV[0].eql?('up')
 
   # Create user-data from erb template
   Dotenv.load
+
   erb = File.open(File.join(File.dirname(__FILE__), "user-data.yml.erb")) { |f| ERB.new(f.read) }
 
   datadog_enabled = ENV["PAUS_DATADOG_ENABLED"] && ["1", "true"].include?(ENV["PAUS_DATADOG_ENABLED"].downcase)

@@ -7,11 +7,18 @@
 #   script/deploy.rb
 #
 
-require 'dotenv'
 require 'erb'
 require 'open3'
 require 'open-uri'
 require 'yaml'
+
+begin
+  require 'dotenv'
+rescue LoadError
+  $stderr.puts "Please install dotenv to load .env:"
+  $stderr.puts "  $ vagrant plugin install dotenv"
+  exit 1
+end
 
 Dir.chdir(File.join(Dir.pwd, "coreos"))
 
