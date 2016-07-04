@@ -56,7 +56,7 @@ Host paus.dev
   StrictHostKeyChecking no
 ```
 
-## Prepare `docker-compose.yml`
+### Prepare `docker-compose.yml`
 
 e.g. Wordpress + MySQL
 
