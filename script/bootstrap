@@ -45,6 +45,14 @@ else
   vagrant plugin install dotenv
 fi
 
+if [[ $(vagrant plugin list) =~ vagrant-dns ]]
+then
+  echo "  o Vagrant plugin 'vagrant-dns' found."
+else
+  echo "  + Installing Vagrant vagrant-dns 'dotenv'"
+  vagrant plugin install vagrant-dns
+fi
+
 #
 # Prepare coreos/.env
 #
