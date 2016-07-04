@@ -89,3 +89,7 @@ Paus consists of the below modules:
   - Web frontend of Paus
 - [__paus-gitreceive__](https://github.com/dtan4/paus-gitreceive)
   - Git server of Paus
+
+## Presentation material
+- [Docker Compose PaaS の作り方、そして社内に導入した話 / #yapc8oji // Speaker Deck](https://speakerdeck.com/dtan4/number-yapc8oji) (in Japanese)
+  - 2016-07-03 YAP(achimon)C::Asia Hachioji 2016 mid in Shinagawa
