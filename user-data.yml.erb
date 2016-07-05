@@ -307,15 +307,6 @@ write_files:
       restrict default nomodify nopeer noquery limited kod
       restrict 127.0.0.1
       restrict [::1]
-  - path: /home/core/add-route-to-paus-frontend.sh
-    permissions: "0755"
-    owner: core:core
-    content: |
-      #!/bin/bash
-
-      etcdctl set /vulcand/backends/paus-frontend/backend '{"Type": "http"}' > /dev/null
-      etcdctl set /vulcand/backends/paus-frontend/servers/paus-frontend '{"URL": "http://paus-frontend:8080"}' > /dev/null
-      etcdctl set /vulcand/frontends/paus-frontend/frontend '{"Type": "http", "BackendId": "paus-frontend", "Route": "Host(`<%= ENV["PAUS_BASE_DOMAIN"] %>`) && PathRegexp(`/`)", "Settings": {"TrustForwardHeader": true}}'
   - path: /home/core/.docker/config.json
     permissions: "0644"
     owner: core:core
@@ -337,6 +328,15 @@ write_files:
       docker -H tcp://localhost:2377 rm $(docker -H tcp://localhost:2377 ps -a -q) || true
       docker -H tcp://localhost:2377 rmi $(docker -H tcp://localhost:2377 images -f "dangling=true" -q) || true
 <% if instance_type == :manager %>
+  - path: /home/core/add-route-to-paus-frontend.sh
+    permissions: "0755"
+    owner: core:core
+    content: |
+      #!/bin/bash
+
+      etcdctl set /vulcand/backends/paus-frontend/backend '{"Type": "http"}' > /dev/null
+      etcdctl set /vulcand/backends/paus-frontend/servers/paus-frontend '{"URL": "http://paus-frontend:8080"}' > /dev/null
+      etcdctl set /vulcand/frontends/paus-frontend/frontend '{"Type": "http", "BackendId": "paus-frontend", "Route": "Host(`<%= ENV["PAUS_BASE_DOMAIN"] %>`) && PathRegexp(`/`)", "Settings": {"TrustForwardHeader": true}}'
   - path: /home/core/docker-compose.yml
     content: |
       gitreceive-upload-key:
