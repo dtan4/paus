@@ -56,6 +56,23 @@ coreos:
         ExecStartPost=/usr/bin/chmod +x /opt/bin/docker-compose
         RemainAfterExit=yes
         Type=oneshot
+    - name: docker-cleanup.service
+      command: start
+      content: |
+        [Unit]
+        Description=Clean up old containers and images
+
+        [Service]
+        ExecStart=/home/core/cleanup.sh
+        Type=oneshot
+    - name: docker-cleanup.timer
+      command: start
+      content: |
+        [Unit]
+        Description=Run clean up script hourly
+
+        [Timer]
+        OnCalendar=hourly
 <% if instance_type == :manager %>
     - name: paus-frontend.service
       command: start
@@ -210,23 +227,6 @@ coreos:
 
         [Install]
         WantedBy=multi-user.target
-    - name: docker-cleanup.service
-      command: start
-      content: |
-        [Unit]
-        Description=Clean up old containers and images
-
-        [Service]
-        ExecStart=/home/core/cleanup.sh
-        Type=oneshot
-    - name: docker-cleanup.timer
-      command: start
-      content: |
-        [Unit]
-        Description=Run clean up script hourly
-
-        [Timer]
-        OnCalendar=hourly
 <% else %>
     - name: swarm-agent.service
       command: start
@@ -328,14 +328,6 @@ write_files:
           }
         }
       }
-<% if instance_type == :manager %>
-  - path: /home/core/docker-compose.yml
-    content: |
-      gitreceive-upload-key:
-        image: quay.io/dtan4/paus-gitreceive:latest
-        volumes_from:
-          - paus-gitreceive
-        entrypoint: /usr/local/bin/upload-key
   - path: /home/core/cleanup.sh
     permissions: "0755"
     owner: core:core
@@ -344,6 +336,14 @@ write_files:
 
       docker -H tcp://localhost:2377 rm $(docker -H tcp://localhost:2377 ps -a -q) || true
       docker -H tcp://localhost:2377 rmi $(docker -H tcp://localhost:2377 images -f "dangling=true" -q) || true
+<% if instance_type == :manager %>
+  - path: /home/core/docker-compose.yml
+    content: |
+      gitreceive-upload-key:
+        image: quay.io/dtan4/paus-gitreceive:latest
+        volumes_from:
+          - paus-gitreceive
+        entrypoint: /usr/local/bin/upload-key
 <% end %>
 <% if datadog_enabled %>
   - path: /opt/dd-agent-conf.d/etcd.yaml
