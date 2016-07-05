@@ -9,6 +9,10 @@ Deploy application by 2 steps:
 
 That's all. You don't have to learn the platform-specific file anymore.
 
+## Demo (YouTube)
+
+[![Demo](images/thumbnail.png)](https://www.youtube.com/watch?v=KtYyhiDeGAo)
+
 ## Try on local machine with Vagrant
 
 At first, run `script/bootstrap` :rocket:
