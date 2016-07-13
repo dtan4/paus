@@ -11,6 +11,16 @@ coreos:
     listen-client-urls: "http://0.0.0.0:2379"
     listen-peer-urls: "http://$private_ipv4:2380"
   units:
+<% if instance_type == :manager %>
+    - name: sshd.socket
+      command: restart
+      runtime: true
+      content: |
+        [Socket]
+        ListenStream=2222
+        FreeBind=true
+        Accept=yes
+<% end %>
     - name: etcd2.service
       command: start
     - name: docker.service
@@ -188,7 +198,7 @@ coreos:
         ExecStartPre=/usr/bin/docker pull quay.io/dtan4/paus-gitreceive:latest
         ExecStart=/usr/bin/docker run \
           --name paus-gitreceive \
-          -p 2222:22 \
+          -p 22:22 \
           -e PAUS_BASE_DOMAIN=<%= ENV["PAUS_BASE_DOMAIN"] %> \
           -e PAUS_DOCKER_CONFIG_BASE64=<%= ENV["PAUS_DOCKER_CONFIG_BASE64"] %> \
           -e PAUS_DOCKER_HOST=tcp://$private_ipv4:2377 \
