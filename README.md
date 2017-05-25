@@ -18,7 +18,7 @@ That's all. You don't have to learn the platform-specific file anymore.
 At first, run `script/bootstrap` :rocket:
 
 ```bash
-$ script/boostrap
+$ script/bootstrap
 ```
 
 ### Prepare `.env`
